@@ -88,6 +88,15 @@ details.mov[open] summary:before{transform:rotate(90deg)}
 table.tan th,table.tan td{text-align:right}table.tan th:first-child,table.tan td:first-child,table.tan th:nth-child(2),table.tan td:nth-child(2){text-align:left}
 table.tan .grp{border-left:2px solid var(--border)}
 table.tan tr.cl td{border-top:2px solid var(--border)}
+.bub circle.b{transition:r .9s cubic-bezier(.16,1,.3,1),fill .6s ease,stroke .6s ease;cursor:pointer}
+.bub circle.g{transition:opacity .6s ease;pointer-events:none}
+.bub text{pointer-events:none;font-family:var(--font)}
+.bub text.v{transition:opacity .4s}
+.bubtip{position:absolute;background:#072F73;color:#fff;border-radius:12px;padding:10px 12px;font-size:12px;line-height:1.5;box-shadow:var(--sh);pointer-events:none;min-width:200px;z-index:5}
+.bubleg{display:flex;flex-wrap:wrap;gap:16px;font-size:11.5px;color:var(--t2);margin-top:6px}
+.bubleg b{font-weight:400}
+.bubleg i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+.bubleg i.ring{border:1.5px dashed #072F73;background:transparent}
 footer{margin-top:40px;font-size:11px;color:var(--t3);text-align:center}
 @media(max-width:1000px){.g4{grid-template-columns:1fr 1fr}.g3,.g2,.g12,.insights,.verdict{grid-template-columns:1fr}.meth{columns:1}}
 @media(max-width:560px){.g4{grid-template-columns:1fr}.hero h2{font-size:24px}.wrap{padding:0 16px 48px}}
@@ -142,10 +151,11 @@ footer{margin-top:40px;font-size:11px;color:var(--t3);text-align:center}
 
   <section>
     <div class="sec-h"><h3><span class="n">03</span>Receita de services e quedas</h3><span class="worldtag wt"></span></div>
-    <div class="grid g2">
-      <div class="card"><h4>Receita de services por origem</h4><div class="sub">R$ mi por mês · rótulo = total · tooltip com % de cada origem</div><div class="ch"><canvas id="cSvcRev"></canvas></div><div class="gi"><div id="iSvcRev"></div></div></div>
-      <div class="card"><h4>Participação dos principais clientes em services</h4><div class="sub">% da receita de services do recorte · jan–set/25 vs jan–set/26 · rótulo = variação em p.p. · vermelho = quedas expressivas</div><div class="ch" style="height:340px"><canvas id="cTop"></canvas></div><div class="gi"><div id="iTop"></div></div></div>
-    </div>
+    <div class="card"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap"><div><h4>Principais clientes em services: participação e receita</h4><div class="sub" id="bubSub">Área da bolha proporcional à participação na receita de services do recorte (jan–set) · clique em 2026 para ver o movimento</div></div>
+      <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end"><div class="filters" id="bubMode"><span class="lbl">Tamanho da bolha</span><button class="pill on" data-b="sh">Participação (%)</button><button class="pill" data-b="rs">Receita (R$)</button></div><div class="filters" id="bubSel"><button class="pill on" data-y="25">2025 (jan–set)</button><button class="pill" data-y="26">2026 (jan–set)</button><button class="pill" data-y="play">▶ Animar</button></div></div></div>
+      <div id="bubWrap" style="position:relative;max-width:980px;margin:0 auto"><svg id="bub" viewBox="0 0 900 430" style="width:100%;height:auto;display:block"></svg><div id="bubTip" class="bubtip" hidden></div></div>
+      <div class="bubleg"><span><i style="background:#072F73"></i>Participação 2025</span><span><i style="background:#0096FA"></i><b id="lgUp">Ganhou participação em 2026</b></span><span><i style="background:#F67979"></i><b id="lgDn">Perdeu participação em 2026</b></span><span><i class="ring"></i>Tamanho em 2025 (referência)</span></div>
+      <div class="gi"><div id="iTop"></div></div></div>
     <div class="grid g4" id="negKpis" style="margin-top:16px"></div>
     <div class="grid g4" id="hiCards" style="margin-top:16px"></div>
     <div class="card" style="margin-top:16px"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap"><h4>Clientes com services: representatividade, variação e quedas</h4><div class="filters" id="cliSel"><button class="pill on" data-m="size">Maiores em services</button><button class="pill" data-m="neg">Maiores quedas</button></div></div><div class="sub">Top 15 · alterne entre maiores clientes e maiores quedas · jan–set/26 vs jan–set/25 · *sem receita em 2025: variação média mensal composta em 2026 (do 1º ao último mês com receita) · % part. services = sobre a receita de services do recorte · % part. plataforma = sobre a plataforma total do cluster</div><div class="scroll"><table id="tCli"></table></div><div class="gi"><div id="iCli"></div></div></div>
@@ -158,10 +168,6 @@ footer{margin-top:40px;font-size:11px;color:var(--t3);text-align:center}
     <div class="grid g2" style="margin-top:16px">
       <div class="card"><h4>1 · Antigos: receita mensal</h4><div class="sub">R$ mi · services + plataforma · jan/25–set/26</div><div class="ch"><canvas id="cAnt"></canvas></div><div class="gi"><div id="iAnt"></div></div></div>
       <div class="card"><h4>2 · Plataforma em 2026: crescimento acumulado desde jan/26</h4><div class="sub">% vs jan/26 · antigos × novos na mesma base (novos a partir do 1º mês de Services PS, sem efeito de entrada)</div><div class="ch"><canvas id="cCum"></canvas></div><div class="gi"><div id="iCum"></div></div></div>
-    </div>
-    <div class="grid g2" style="margin-top:16px">
-      <div class="card"><h4>3 · Plataforma: variação % mês a mês (2026)</h4><div class="sub">Novos × Antigos · cada barra = mês vs mês anterior · novos: mesma base de clientes já com services (exclui entradas no mês)</div><div class="ch"><canvas id="cMoM"></canvas></div><div class="gi"><div id="iMoM"></div></div></div>
-      <div class="card"><h4>4 · Novos: receita mensal (2026)</h4><div class="sub">R$ mil · services + plataforma · rótulo = valor e % vs mês anterior · todos os novos, inclusive pontuais · linha = nº de clientes novos ativos</div><div class="ch"><canvas id="cNov"></canvas></div><div class="gi"><div id="iNov"></div></div></div>
     </div>
   </section>
 
@@ -247,6 +253,56 @@ const legTop={position:'top',align:'start'};
 function stackOpts(extra={}){return Object.assign({layout:{padding:{top:22}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:gridY,grace:'12%'}}},extra)}
 function setT(id,h){document.getElementById(id).innerHTML=h}
 
+
+function drawBubbles(list,T9,HL){
+  window._bubArgs=[list,T9,HL];const RS=ST.bm==='rs';
+  const W0=900,H0=430,svg=document.getElementById('bub');if(!svg||!svg.setAttribute)return;
+  const items=list.filter(r=>r.sv25>0||r.sv26>0).map(r=>({r,s25:RS?r.sv25/T9.sv25:r.sv25/T9.sv25,s26:RS?r.sv26/T9.sv25:r.sv26/T9.sv26,RS}));
+  const mx=Math.max(...items.map(x=>Math.max(x.s25,x.s26)));
+  const sumA=items.reduce((a,x)=>a+Math.max(x.s25,x.s26),0);
+  let K=Math.sqrt(0.30*W0*H0/(Math.PI*sumA));K=Math.min(K,130/Math.sqrt(mx));
+  items.forEach(x=>{x.r25=K*Math.sqrt(x.s25);x.r26=K*Math.sqrt(x.s26);x.R=Math.max(x.r25,x.r26);x.ins=Math.min(x.r25,x.r26)>38});
+  const placed=[];items.slice().sort((a,b)=>b.R-a.R).forEach(x=>{const pad=x.ins?6:24;let ok=false;
+    for(let t=0;t<4000&&!ok;t++){const ang=t*0.35,rad=2.2*t*0.35,cx=W0/2+rad*Math.cos(ang)*1.6,cy=H0/2+rad*Math.sin(ang)*0.9;
+      if(cx-x.R<6||cx+x.R>W0-6||cy-x.R<6||cy+x.R+(x.ins?0:22)>H0-4)continue;
+      if(placed.every(p=>Math.hypot(p.cx-cx,p.cy-cy)>p.R+x.R+Math.max(pad,p.pad)))ok=true,Object.assign(x,{cx,cy,pad})}
+    if(!ok)Object.assign(x,{cx:W0/2,cy:H0/2,pad});placed.push(x)});
+  const nm=s=>s.replace(' Company','').replace(/ \(.*\)/,'').replace(' Brasil','');
+  let h='<g class="bub">';
+  items.forEach((x,k)=>{const inside=x.ins,up=x.s26>=x.s25;
+    h+=`<circle class="g" data-k="${k}" cx="${x.cx.toFixed(1)}" cy="${x.cy.toFixed(1)}" r="${x.r25.toFixed(1)}" fill="none" stroke="#072F73" stroke-width="1.5" stroke-dasharray="4 3" style="opacity:0"/>`;
+    h+=`<circle class="b" data-k="${k}" cx="${x.cx.toFixed(1)}" cy="${x.cy.toFixed(1)}" style="r:${x.r25.toFixed(1)}px" fill="#072F73" fill-opacity=".9" stroke="#fff" stroke-width="2"/>`;
+    const fc=inside?'#fff':'#1D1D1F',fs=inside?Math.min(14,Math.max(10,Math.min(x.r25,x.r26)/5)):10,maxc=inside?Math.max(7,Math.floor(Math.min(x.r25,x.r26)*1.7/fs*1.6)):20;
+    const wds=nm(x.r.name).split(' ');let l1='',l2='';wds.forEach(w=>{if(!l2&&(l1+' '+w).trim().length<=maxc)l1=(l1+' '+w).trim();else l2=(l2+' '+w).trim()});
+    if(l2.length>maxc)l2=l2.slice(0,maxc-1)+'…';if(!inside&&l2){l1=(l1+' '+l2).slice(0,maxc);l2=''}
+    const lines=inside&&l2?[l1,l2]:[l1],lh=fs*1.15,y0=inside?x.cy-(lines.length*lh)/2+fs*0.35:x.cy+x.R+12;
+    lines.forEach((s,q)=>{h+=`<text x="${x.cx.toFixed(1)}" y="${(y0+q*lh).toFixed(1)}" text-anchor="middle" font-size="${fs.toFixed(1)}" font-weight="700" fill="${fc}">${s}</text>`});
+    h+=`<text class="v" data-k="${k}" x="${x.cx.toFixed(1)}" y="${(y0+lines.length*lh+(inside?1:0)).toFixed(1)}" text-anchor="middle" font-size="${inside?11:9.5}" fill="${fc}" fill-opacity="${inside?.9:.75}">${RS?brl(x.r.sv25):pct(x.s25,1)}</text>`});
+  svg.innerHTML=h+'</g>';
+  window._bub={items,HL};
+  const tip=document.getElementById('bubTip'),wrap=document.getElementById('bubWrap');
+  svg.querySelectorAll('circle.b').forEach(c=>{c.onmousemove=e=>{const x=items[+c.dataset.k],d=(x.s26-x.s25)*100,b=wrap.getBoundingClientRect();
+      tip.innerHTML=`<b>${x.r.name}</b><br>2025: ${brl(x.r.sv25)} · ${pct(x.s25,1)}<br>2026: ${brl(x.r.sv26)} · ${pct(x.s26,1)}<br>Participação: <b>${d>=0?'+':''}${d.toFixed(1).replace('.',',')} p.p.</b> · R$ ${x.r.sv25?sp(x.r.sv26/x.r.sv25-1,0):'novo'}`;
+      tip.hidden=false;let l=e.clientX-b.left+14,tp=e.clientY-b.top+14;if(l>b.width-220)l-=240;tip.style.left=l+'px';tip.style.top=tp+'px'};c.onmouseleave=()=>tip.hidden=true});
+  setBubYear(ST.yr||'25',true);
+}
+function setBubYear(y,instant){const B=window._bub;if(!B)return;const svg=document.getElementById('bub');
+  document.querySelectorAll('#bubMode .pill').forEach(p=>p.classList.toggle('on',p.dataset.b===(ST.bm||'sh')));
+  document.querySelectorAll('#bubSel .pill[data-y]').forEach(p=>p.classList.toggle('on',p.dataset.y===y));
+  B.items.forEach((x,k)=>{const c=svg.querySelector(`circle.b[data-k="${k}"]`),g=svg.querySelector(`circle.g[data-k="${k}"]`),v=svg.querySelector(`text.v[data-k="${k}"]`);
+    if(instant){c.style.transition='none';requestAnimationFrame(()=>requestAnimationFrame(()=>c.style.transition=''))}
+    const r=y==='26'?x.r26:x.r25;c.style.r=Math.max(r,0.5)+'px';
+    const up=x.s26>=x.s25;c.setAttribute('fill',y==='26'?(up?'#0096FA':'#F67979'):'#072F73');
+    g.style.opacity=y==='26'?1:0;
+    const d=(x.s26-x.s25)*100;v.textContent=x.RS?(y==='26'?`${brl(x.r.sv26)} (${x.r.sv25?sp(x.r.sv26/x.r.sv25-1,0):'novo'})`:brl(x.r.sv25)):(y==='26'?`${pct(x.s26,1)} (${d>=0?'+':''}${d.toFixed(1).replace('.',',')} p.p.)`:pct(x.s25,1))});
+  ST.yr=y}
+document.addEventListener('click',e=>{const m=e.target.closest('#bubMode .pill');if(!m)return;document.querySelectorAll('#bubMode .pill').forEach(x=>x.classList.toggle('on',x===m));ST.bm=m.dataset.b;bubTexts();if(window._bubArgs)drawBubbles(...window._bubArgs)});
+function bubTexts(){const RS=ST.bm==='rs';const s=document.getElementById('bubSub');if(!s||!s.style)return;
+  s.textContent=RS?'Área da bolha proporcional à receita de services em R$ (jan–set), mesma escala nos dois anos · clique em 2026 para ver o movimento':'Área da bolha proporcional à participação na receita de services do recorte (jan–set) · clique em 2026 para ver o movimento';
+  document.getElementById('lgUp').textContent=RS?'Receita cresceu em 2026':'Ganhou participação em 2026';document.getElementById('lgDn').textContent=RS?'Receita caiu em 2026':'Perdeu participação em 2026';
+  const lg=document.querySelector('.bubleg span:first-child');if(lg)lg.lastChild.textContent=RS?'Receita 2025':'Participação 2025'}
+document.addEventListener('click',e=>{const p=e.target.closest('#bubSel .pill');if(!p)return;const y=p.dataset.y;
+  if(y==='play'){setBubYear('25');setTimeout(()=>setBubYear('26'),900)}else setBubYear(y)});
 function sbRates(list,key,from,to){const r=[];for(let i=from+1;i<=to;i++){let p=0,q=0;list.forEach(n=>{if(n[key][i-1]>0){p+=n[key][i-1];q+=n[key][i]}});r.push(p?q/p-1:null)}return r}
 function chainAvg(r){const v=r.filter(x=>x!=null);if(!v.length)return NaN;return Math.pow(v.reduce((a,x)=>a*(1+x),1),1/v.length)-1}
 function renderNov(){
@@ -367,28 +423,17 @@ function render(){
   setT('iPlatSvc',`<span>Os ${CLs} com services geram <b>${brl(W.plat_svc[LAST])} de plataforma em set/26 — ${pct(plShare[LAST],0)} da plataforma ${c==='all'?'Blip':'do '+c}</b> (set/25: ${pct(plShare[SEP25],0)}). Em média, ${brl(W.plat_svc[LAST]/st[LAST])}/mês por cliente com services vs ${brl(PL[LAST]/T[LAST])} da média ${c==='all'?'Blip':'do cluster'}.</span>`);
 
   // 03
-  const ks=Object.keys(W.svc_rev),svR=M.map((_,i)=>sum(ks.map(k=>W.svc_rev[k][i])));
-  mk('cSvcRev',{type:'bar',data:{labels:ML,datasets:ks.map(k=>({label:CN[k],data:W.svc_rev[k].map(v=>v/1e6),backgroundColor:CC[k],borderRadius:3,stack:'s'}))},
-    options:stackOpts({plugins:{legend:legTop,topLabels:{fmt:i=>(svR[i]/1e6).toFixed(1).replace('.',','),size:8.5},tooltip:{callbacks:{label:x=>`${x.dataset.label}: R$ ${mi1(x.parsed.y*1e6)} mi (${pct(x.parsed.y*1e6/svR[x.dataIndex],0)})`}}}})});
-  const r9=sum(svR.slice(12)),r9o=sum(svR.slice(0,9));
-  const shr=k=>sum(W.svc_rev[k].slice(12))/r9;
-  const pk=svR.indexOf(Math.max(...svR));
-  setT('iSvcRev',`<span>Services ${CLs}: ${brl(r9)} em jan–set/26 (<b>${sp(r9/r9o-1)}</b> vs 25). ${ks.map(k=>`${CN[k]}: ${pct(shr(k),0)} (${sp(sum(W.svc_rev[k].slice(12))/sum(W.svc_rev[k].slice(0,9))-1)})`).join(' · ')}. Pico em ${ML[pk]} (${brl(svR[pk])}); média mensal 2026 ${brl(r9/9)} vs ${brl(sum(svR.slice(6,12))/6)} no 2S25.</span>`);
   // 03b — representatividade por cliente
   const T9=W.tot9, CP25=sum(PL.slice(0,9)), CP26=sum(PL.slice(12,21));
   const cli=W.cli, HL=['General Motors Company','iFood','Alelo Brasil'];
   const tp=W.top_sv,TT=W.sv26_total;
   const t10=sum(tp.map(r=>r.sv26))/TT;
   const top10=cli.slice(0,10);
-  mk('cTop',{type:'bar',data:{labels:top10.map(r=>r.name.replace(' Company','').slice(0,22)),datasets:[
-    {label:'% services 9M25',data:top10.map(r=>r.sv25/T9.sv25*100),backgroundColor:'#C5D9FB',borderRadius:3},
-    {label:'% services 9M26',data:top10.map(r=>r.sv26/T9.sv26*100),backgroundColor:top10.map(r=>HL.includes(r.name)?'#E60F0F':'#072F73'),borderRadius:3}]},
-    options:{indexAxis:'y',layout:{padding:{right:46}},plugins:{legend:{position:'top',align:'start',labels:{generateLabels:ch=>[{text:'% services 9M25',fillStyle:'#C5D9FB',strokeStyle:'#C5D9FB',pointStyle:'circle',datasetIndex:0},{text:'% services 9M26',fillStyle:'#072F73',strokeStyle:'#072F73',pointStyle:'circle',datasetIndex:1},{text:'Quedas expressivas (9M26)',fillStyle:'#E60F0F',strokeStyle:'#E60F0F',pointStyle:'circle',datasetIndex:1}]}},endLabels:{fmt:(di,i)=>{if(di!==1)return'';const r=top10[i],d=(r.sv26/T9.sv26-r.sv25/T9.sv25)*100;return(d>=0?'+':'')+d.toFixed(1).replace('.',',')+' p.p.'}},
-      tooltip:{callbacks:{title:it=>top10[it[0].dataIndex].name,label:x=>{const r=top10[x.dataIndex];return x.datasetIndex==0?`2025 (jan–set): ${brl(r.sv25)} · ${pct(r.sv25/T9.sv25)} do total`:`2026 (jan–set): ${brl(r.sv26)} · ${pct(r.sv26/T9.sv26)} do total`}}}},
-      scales:{x:{grid:gridY,ticks:{callback:v=>v+'%'}},y:{grid:{display:false},ticks:{font:{size:10}}}}}});
+  drawBubbles(cli.slice(0,12),T9,HL);
   const hl=HL.map(n=>cli.find(r=>r.name===n)).filter(Boolean);
   const netSv=T9.sv26-T9.sv25, hlD=sum(hl.map(r=>r.sv26-r.sv25));
-  setT('iTop',`<span><b>Top 10 = ${pct(sum(top10.map(r=>r.sv26))/T9.sv26,0)} da receita de services ${CLs} em 2026.</b> Em vermelho, as quedas expressivas: ${hl.map(r=>`${r.name.replace(' Company','')} ${brl(r.sv25)} → ${brl(r.sv26)} (${sp(r.sv26/r.sv25-1,0)}; participação ${pct(r.sv25/T9.sv25,0)} → ${pct(r.sv26/T9.sv26,0)})`).join(' · ')||'—'}. A participação pode subir mesmo com queda em R$ quando o total de services cai mais (${sp(T9.sv26/T9.sv25-1,0)}).</span>`);
+  {const b12=cli.slice(0,12).map(r=>({r,d:(r.sv26/T9.sv26-r.sv25/T9.sv25)*100})).sort((a,b)=>a.d-b.d),lo=b12.filter(x=>x.d<0).slice(0,3),hi=b12.filter(x=>x.d>0).slice(-3).reverse();
+   setT('iTop',`<span><b>Top 12 = ${pct(sum(cli.slice(0,12).map(r=>r.sv26))/T9.sv26,0)} da receita de services ${CLs} em 2026</b> (${pct(sum(cli.slice(0,12).map(r=>r.sv25))/T9.sv25,0)} em 2025). Mais perderam participação: ${lo.map(x=>`${x.r.name.replace(' Company','')} (${x.d.toFixed(1).replace('.',',')} p.p.)`).join(', ')||'—'}. Mais ganharam: ${hi.map(x=>`${x.r.name.replace(' Company','')} (+${x.d.toFixed(1).replace('.',',')} p.p.)`).join(', ')||'—'}. Participação pode subir mesmo com queda em R$ quando o total cai mais (${sp(T9.sv26/T9.sv25-1,0)}).</span>`);}
   setT('hiCards',hl.length?hl.map(r=>`<div class="card kpi" style="border-left:4px solid #E60F0F"><div class="k-l">${r.name.replace(' Company','')}</div>
      <div class="k-v">${sp(r.sv26/r.sv25-1,0)}<small style="color:#525252">services</small></div>
      <div class="k-d">${brl(r.sv25)} → ${brl(r.sv26)} · participação nos services ${CLs}: ${pct(r.sv25/T9.sv25)} → ${pct(r.sv26/T9.sv26)}<br>Plataforma: ${brl(r.pl25)} → ${brl(r.pl26)} (${var_(r.pl26,r.pl25)})</div></div>`).join('')
@@ -439,19 +484,6 @@ function render(){
       tooltip:{callbacks:{title:it=>M26[it[0].dataIndex],label:x=>`${x.dataset.label}: ${x.parsed.y>=0?'+':''}${x.parsed.y.toFixed(1).replace('.',',')}% vs jan/26`+(x.datasetIndex?` · ${brl(aP[x.dataIndex])}`:'')}}},
       scales:{x:{grid:{display:false}},y:{grid:gridY,grace:'10%',ticks:{callback:v=>v+'%'}}}}});
   setT('iCum',`<span>Mesma régua para os dois grupos: <b>novos ${sp(nCumT)}</b> vs <b>antigos ${sp(aJS)}</b> de jan a set/26. Novos medidos a partir do 1º mês de services de cada cliente, sem o efeito de novas entradas. Com as entradas, a plataforma total ${c==='all'?'Blip':'do '+c} fica em ${sp(tJS)} vs ${sp(aJS)} só com antigos.</span>`);
-  mk('cMoM',{type:'bar',data:{labels:M26.slice(1),datasets:[
-    {label:'Antigos',data:aM.slice(1).map(v=>v*100),backgroundColor:'#072F73',borderRadius:3},
-    {label:'Novos',data:nM.slice(1).map(v=>v==null?null:v*100),backgroundColor:'#0096FA',borderRadius:3}]},
-    options:{plugins:{legend:legTop,tooltip:{callbacks:{title:it=>`${M26[it[0].dataIndex]} → ${M26[it[0].dataIndex+1]}`,label:x=>{const i=x.dataIndex+1;return x.datasetIndex?`Novos (mesma base): ${x.parsed.y>=0?'+':''}${x.parsed.y.toFixed(1).replace('.',',')}%`:`Antigos: ${x.parsed.y>=0?'+':''}${x.parsed.y.toFixed(1).replace('.',',')}% (${brl(aP[i-1])} → ${brl(aP[i])})`}}}},
-      scales:{x:{grid:{display:false}},y:{grid:gridY,ticks:{callback:v=>v+'%'}}}}});
-  setT('iMoM',`<span>Variação % de plataforma mês contra mês em 2026: <b>novos cresceram mais que os antigos em ${nWin} de 8 meses</b>. Média composta: novos ${isFinite(nC)?sp(nC):'—'}/mês vs antigos ${sp(aC)}/mês. Base dos novos é pequena, por isso a variação é mais volátil.</span>`);
-  mk('cNov',{type:'bar',data:{labels:M26,datasets:[
-    {type:'line',label:'Nº de clientes novos (eixo dir.)',data:nN,borderColor:'#A3A3A3',backgroundColor:'#A3A3A3',yAxisID:'y2',pointRadius:2,tension:.2,order:0},
-    {label:'Plataforma',data:nP.map(v=>v/1e3),backgroundColor:'#072F73',borderRadius:3,stack:'s',order:1},
-    {label:'Services',data:nS.map(v=>v/1e3),backgroundColor:'#0096FA',borderRadius:3,stack:'s',order:1}]},
-    options:{layout:{padding:{top:22}},plugins:{legend:legTop,topLabels:{fmt:i=>{const v=nP[i]+nS[i],p=i?nP[i-1]+nS[i-1]:0;return v?[i&&p?(v/p-1>=0?'+':'')+((v/p-1)*100).toFixed(0)+'%':'',Math.round(v/1e3)+'k']:''},size:8.5},tooltip:{callbacks:{title:it=>M26[it[0].dataIndex],label:x=>x.datasetIndex==0?`Clientes novos ativos: ${x.parsed.y}`:`${x.dataset.label}: R$ ${Math.round(x.parsed.y).toLocaleString('pt-BR')} mil`}}},
-      scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:gridY,grace:'12%',title:{display:true,text:'R$ mil'}},y2:{position:'right',grid:{display:false},beginAtZero:true,ticks:{precision:0}}}}});
-  setT('iNov',`<span>Todos os novos (1º Services PS ≥ out/25), inclusive os pontuais: ${C9.Novos.n} clientes. Receita mensal de ${brl(nP[0]+nS[0])} em jan/26 para ${brl(nP[8]+nS[8])} em set/26 (${(nP[0]+nS[0])?sp((nP[8]+nS[8])/(nP[0]+nS[0])-1,0):'—'}). Pico de clientes ativos no mês: ${Math.max(...nN)}.</span>`);
   const bl=Object.keys(A.svb),bv=bl.map(k=>A.svb[k]);
   const neg3=A.svb_val['Zerou services']+A.svb_val['<-30%']+A.svb_val['-30 a 0%'],posN=A.svb['>30%']+A.svb['0 a 30%']+A.svb['Passou a ter'];
   const nw=W.newest;
